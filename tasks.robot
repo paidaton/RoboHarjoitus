@@ -82,13 +82,14 @@ Embed the robot screenshot to the receipt PDF file
 
 *** Keywords ***
 Create a ZIP file of the receipts
-    Archive Folder With Zip  ${CURDIR}${/}output  ropottitilaukset.zip
+    [Arguments]   ${zipname} 
+    Archive Folder With Zip  ${CURDIR}${/}output  ${zipname}
 
 *** Keywords ***
-Ask URL
-    Add text input    ordercsvurli    label=tillausten csv filun osote
-    ${orderurl}=    Run dialog
-    [Return]    ${orderurl.ordercsvurli}
+Ask ZipFileName
+    Add text input    ziptiedostonimi    label=KuittiZipinNimi
+    ${zipname}=    Run dialog
+    [Return]    ${zipname.ziptiedostonimi}
 
 *** Keywords ***
 Close the browser and remove useless files
@@ -104,7 +105,7 @@ Close the browser and remove useless files
 *** Tasks ***
 Order robots from RobotSpareBin Industries Inc
     Open the robot order website
-    #${orderurl}=  Ask URL
+    ${zipname}=  Ask ZipFileName
     ${salesurl}=  Get Secret  secreturl
     Log  ${salesurl}
     Download    ${secret}[salesurl]    overwrite=True
@@ -119,6 +120,6 @@ Order robots from RobotSpareBin Industries Inc
          Embed the robot screenshot to the receipt PDF file    ${screenshot}    ${kuitti}
          Go to order another robot
     END
-    Create a ZIP file of the receipts  
+    Create a ZIP file of the receipts  ${zipname}
     [Teardown]    Close the browser and remove useless files
 
