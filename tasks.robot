@@ -5,12 +5,11 @@ Documentation     Tilaa uuden robotin RobotSpareBin Industries Inc.
 ...               Tallettaa the screenshot of the ordered robot.
 ...               Sulauttaa the screenshot of the robot to the PDF receipt.
 ...               Luo ZIP archive of the receipts and the images.
+...               Putsaa tarpeettomat filut ja sulkee selaimen
 Library           RPA.Browser.Selenium
-#Library           RPA.Browser.Playwright
 Library           RPA.Tables
 Library           RPA.HTTP
 Library           OperatingSystem
-#Library           RPA.Desktop
 Library           RPA.PDF
 Library           RPA.Archive
 Library           RPA.Dialogs
@@ -20,21 +19,11 @@ Library           RPA.RobotLogListener
 Variables         variables.py
 
 
-*** Variables ***
-#${ORDERS}  20
-#${orderurl}     %{RPA_SECRET_URL}
-
-*** Keywords ***
-Open the robot order website
-        Open Available Browser  https://robotsparebinindustries.com/#/robot-order
-
-
 *** Keywords ***
 Fill the form 
     [Arguments]    ${row}
     Click Element   css:#head[name="head"]
     Select From List By Value    css:#head[name="head"]  ${row}[Head]
-    #Select Radio Button  mikä hemmetti muka käy tähän??????  ${row}[Body]
     Click Element    css:#id-body-${row}[Body]
     ${elem} = 	Get WebElement   class:form-control
     Input Text    ${elem}  ${row}[Legs]    True
@@ -42,8 +31,7 @@ Fill the form
 
 *** Keywords ***
 Close the annoying modal
-    #Click Button  css:button[name="OK"]
-    Click Button  css:button[class="btn btn-dark"]
+    Click Button  OK
 
 *** Keywords ***
 Preview the robot
@@ -88,7 +76,7 @@ Create a ZIP file of the receipts
 
 *** Keywords ***
 Ask ZipFileName
-    Add text input    ziptiedostonimi    label=KuittiZipinNimi
+    Add text input    ziptiedostonimi    label=Annappas tiedostonimi Zip-tiedostolle, kiitos
     ${zipname}=    Run dialog
     [Return]    ${zipname.ziptiedostonimi}
 
@@ -112,10 +100,9 @@ Klikkaa elementtia jos niikseen
 
 *** Tasks ***
 Order robots from RobotSpareBin Industries Inc
-    Open the robot order website
+    Open Available Browser  https://robotsparebinindustries.com/#/robot-order
     ${zipname}=  Ask ZipFileName
     ${salesurl}=  Get Secret  secreturl
-    Log  ${salesurl}
     Download    ${secret}[salesurl]    overwrite=True
     ${orders}=    Read table from CSV  orders.csv   header=True
     FOR    ${row}    IN    @{orders}
