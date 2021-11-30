@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# +
 *** Settings ***
 Documentation     Tilaa uuden robotin RobotSpareBin Industries Inc.
 ...               Tallettaa the order HTML receipt as a PDF file.
@@ -20,12 +18,12 @@ Library           RPA.FileSystem
 Library           RPA.Robocorp.Vault
 Library           RPA.RobotLogListener
 Variables         variables.py
-# -
 
 
 *** Variables ***
 #${ORDERS}  20
 #${orderurl}     %{RPA_SECRET_URL}
+
 
 *** Keywords ***
 Open the robot order website
@@ -43,14 +41,17 @@ Fill the form
     Input Text    ${elem}  ${row}[Legs]    True
     Input Text      address  ${row}[Address]
 
+
 *** Keywords ***
 Close the annoying modal
     #Click Button  css:button[name="OK"]
     Click Button  css:button[class="btn btn-dark"]
 
+
 *** Keywords ***
 Preview the robot
     Click Button  preview
+
 
 *** Keywords ***
 Submit the order
@@ -59,9 +60,11 @@ Submit the order
     Klikkaa elementtia jos niikseen    class="diipadaapaa"
     Wait Until Page Contains Element    id:order-completion
 
+
 *** Keywords ***
 Go to order another robot
     Click Button  order-another
+
 
 *** Keywords ***
 Store the receipt as a PDF file
@@ -70,11 +73,13 @@ Store the receipt as a PDF file
     Html To Pdf    ${kuitti}    ${CURDIR}${/}output${/}robokuitti_${Order number}.pdf
     Return From Keyword  ${CURDIR}${/}output${/}robokuitti_${Order number}.pdf
 
+
 *** Keywords ***
 Take a screenshot of the robot
     [Arguments]    ${Order number}
     Screenshot    robot-preview-image   ${CURDIR}${/}output${/}robokuva_${Order number}.png
     Return From Keyword  ${CURDIR}${/}output${/}robokuva_${Order number}.png
+
 
 *** Keywords ***
 Embed the robot screenshot to the receipt PDF file
@@ -89,11 +94,13 @@ Create a ZIP file of the receipts
     [Arguments]   ${zipname} 
     Archive Folder With Zip  ${CURDIR}${/}output  ${zipname}
 
+
 *** Keywords ***
 Ask ZipFileName
     Add text input    ziptiedostonimi    label=KuittiZipinNimi
     ${zipname}=    Run dialog
     [Return]    ${zipname.ziptiedostonimi}
+
 
 *** Keywords ***
 Close the browser and remove useless files
@@ -108,11 +115,13 @@ Close the browser and remove useless files
         END
     #Remove Directory  ${CURDIR}${/}output  recursive=True
 
+
 *** Keywords ***
 Klikkaa elementtia jos niikseen
     [Arguments]    ${locator}
     Mute Run On Failure    Click Element When Visible
     Run Keyword And Ignore Error    Click Element When Visible    ${locator}
+
 
 *** Tasks ***
 Order robots from RobotSpareBin Industries Inc
@@ -134,4 +143,3 @@ Order robots from RobotSpareBin Industries Inc
     END
     Create a ZIP file of the receipts  ${zipname}
     [Teardown]    Close the browser and remove useless files
-
