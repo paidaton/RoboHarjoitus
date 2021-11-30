@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
-# +
 *** Settings ***
 Documentation     Tilaa uuden robotin RobotSpareBin Industries Inc.
 ...               Tallettaa the order HTML receipt as a PDF file.
 ...               Tallettaa the screenshot of the ordered robot.
 ...               Sulauttaa the screenshot of the robot to the PDF receipt.
 ...               Luo ZIP archive of the receipts and the images.
-
 Library           RPA.Browser.Selenium
 #Library           RPA.Browser.Playwright
 Library           RPA.Tables
 Library           RPA.HTTP
+Library           OperatingSystem
 #Library           RPA.Desktop
 Library           RPA.PDF
 Library           RPA.Archive
 Library           RPA.Dialogs
 Library           RPA.FileSystem
 Library           RPA.Robocorp.Vault
+Library           RPA.RobotLogListener
 Variables         variables.py
-# -
 
+
+*** Variables ***
+#${ORDERS}  20
+#${orderurl}     %{RPA_SECRET_URL}
 
 *** Keywords ***
 Open the robot order website
@@ -49,6 +52,8 @@ Preview the robot
 *** Keywords ***
 Submit the order
     Click Button  order
+    Klikkaa elementtia jos niikseen    class="salo-danger" #alert alert-danger
+    Klikkaa elementtia jos niikseen    class="diipadaapaa"
     Wait Until Page Contains Element    id:order-completion
 
 *** Keywords ***
@@ -89,14 +94,22 @@ Ask ZipFileName
 
 *** Keywords ***
 Close the browser and remove useless files
-    ${index}=    Set Variable    1
+    ${files}=    Count Files In Directory  ${CURDIR}${/}output
+    ${files}=    Evaluate    ${files} / 2
     Close Browser
-        FOR    ${index}    IN RANGE    21
-            Remove File    ${CURDIR}${/}output${/}robokuva_${index}.png
-            Remove File    ${CURDIR}${/}output${/}robokuitti_${index}.pdf
+        FOR    ${index}    IN RANGE    ${files}
             ${index}=    Evaluate    ${index} + 1
+            ${index}=    Convert To Integer    ${index}
+            RPA.FileSystem.Remove File    ${CURDIR}${/}output${/}robokuva_${index}.png
+            RPA.FileSystem.Remove File    ${CURDIR}${/}output${/}robokuitti_${index}.pdf
         END
     #Remove Directory  ${CURDIR}${/}output  recursive=True
+
+*** Keywords ***
+Klikkaa elementtia jos niikseen
+    [Arguments]    ${locator}
+    Mute Run On Failure    Click Element When Visible
+    Run Keyword And Ignore Error    Click Element When Visible    ${locator}
 
 *** Tasks ***
 Order robots from RobotSpareBin Industries Inc
@@ -110,7 +123,7 @@ Order robots from RobotSpareBin Industries Inc
          Close the annoying modal
          Fill the form    ${row}
          Preview the robot
-         Wait Until Keyword Succeeds    5x    5s   Submit the order  
+         Wait Until Keyword Succeeds    5x    2s   Submit the order  
          ${kuitti}=     Store the receipt as a PDF file    ${row}[Order number]
          ${screenshot}=    Take a screenshot of the robot    ${row}[Order number]
          Embed the robot screenshot to the receipt PDF file    ${screenshot}    ${kuitti}
@@ -118,4 +131,3 @@ Order robots from RobotSpareBin Industries Inc
     END
     Create a ZIP file of the receipts  ${zipname}
     [Teardown]    Close the browser and remove useless files
-
