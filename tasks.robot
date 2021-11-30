@@ -96,14 +96,13 @@ Ask ZipFileName
 Close the browser and remove useless files
     ${files}=    Count Files In Directory  ${CURDIR}${/}output
     ${files}=    Evaluate    ${files} / 2
+    ${files}=    Convert To Integer    ${files}
     Close Browser
         FOR    ${index}    IN RANGE    ${files}
             ${index}=    Evaluate    ${index} + 1
-            ${index}=    Convert To Integer    ${index}
             RPA.FileSystem.Remove File    ${CURDIR}${/}output${/}robokuva_${index}.png
             RPA.FileSystem.Remove File    ${CURDIR}${/}output${/}robokuitti_${index}.pdf
         END
-    #Remove Directory  ${CURDIR}${/}output  recursive=True
 
 *** Keywords ***
 Klikkaa elementtia jos niikseen
