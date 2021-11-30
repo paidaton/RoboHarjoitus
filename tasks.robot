@@ -21,10 +21,6 @@ Variables         variables.py
 # -
 
 
-*** Variables ***
-#${ORDERS}  20
-#${orderurl}     %{RPA_SECRET_URL}
-
 *** Keywords ***
 Open the robot order website
         Open Available Browser  https://robotsparebinindustries.com/#/robot-order
